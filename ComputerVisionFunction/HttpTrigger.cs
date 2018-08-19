@@ -14,7 +14,7 @@ namespace ComputerVisionFunction
 	public static class HttpTrigger
 	{
 		[FunctionName("HttpTrigger")]
-		public async static Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequest req, TraceWriter log)
+		public async static Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)]HttpRequest req, TraceWriter log)
 		{
 			log.Info("Function invoked");
 
@@ -23,10 +23,15 @@ namespace ComputerVisionFunction
 				return new BadRequestResult();
 			
 			// grab the key and URI from the portal config
-			string visionKey = Environment.GetEnvironmentVariable("VisionKey");
+			var visionKey = Environment.GetEnvironmentVariable("VisionKey");
+			var visionEndpoint = Environment.GetEnvironmentVariable("VisionEndpoint");
 
 			// create a client and request Tags for the image submitted
-			var vsc = new ComputerVisionClient(new ApiKeyServiceClientCredentials(visionKey));
+			var vsc = new ComputerVisionClient(new ApiKeyServiceClientCredentials(visionKey))
+			{
+				Endpoint = visionEndpoint
+			};
+
 			ImageDescription result = null;
 
 			// We read the content as a byte array and assume it's an image
